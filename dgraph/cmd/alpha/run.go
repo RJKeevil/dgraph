@@ -653,18 +653,6 @@ func run() {
 		ChangeDataConf: Alpha.Conf.GetString("cdc"),
 	}
 
-	keys, err := ee.GetKeys(Alpha.Conf)
-	x.Check(err)
-
-	if keys.AclSecretKey != nil {
-		opts.AclJwtAlg = keys.AclJwtAlg
-		opts.AclSecretKey = keys.AclSecretKey
-		opts.AclSecretKeyBytes = keys.AclSecretKeyBytes
-		opts.AccessJwtTtl = keys.AclAccessTtl
-		opts.RefreshJwtTtl = keys.AclRefreshTtl
-		glog.Info("ACL secret key loaded successfully.")
-	}
-
 	x.Config.Limit = z.NewSuperFlag(Alpha.Conf.GetString("limit")).MergeAndCheckDefault(
 		worker.LimitDefaults)
 	abortDur := x.Config.Limit.GetDuration("txn-abort-after")
@@ -698,14 +686,12 @@ func run() {
 		Raft:                raft,
 		WhiteListedIPRanges: ips,
 		StrictMutations:     opts.MutationsMode == worker.StrictMutations,
-		AclEnabled:          keys.AclSecretKey != nil,
+		AclEnabled:          false,
 		AbortOlderThan:      abortDur,
 		StartTime:           startTime,
 		Security:            security,
 		TLSClientConfig:     tlsClientConf,
 		TLSServerConfig:     tlsServerConf,
-		AclJwtAlg:           keys.AclJwtAlg,
-		AclPublicKey:        keys.AclPublicKey,
 		Audit:               opts.Audit != nil,
 		Badger:              bopts,
 	}
@@ -717,8 +703,6 @@ func run() {
 
 	// Set the directory for temporary buffers.
 	z.SetTmpDir(x.WorkerConfig.TmpDir)
-
-	x.WorkerConfig.EncryptionKey = keys.EncKey
 
 	setupCustomTokenizers()
 	x.Config.PortOffset = Alpha.Conf.GetInt("port_offset")

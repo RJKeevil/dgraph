@@ -706,10 +706,6 @@ func run() error {
 	}
 
 	creds := z.NewSuperFlag(Live.Conf.GetString("creds")).MergeAndCheckDefault(x.DefaultCreds)
-	keys, err := ee.GetKeys(Live.Conf)
-	if err != nil {
-		return err
-	}
 
 	x.PrintVersion()
 	opt = options{
@@ -728,7 +724,6 @@ func run() error {
 		bufferSize:      Live.Conf.GetInt("bufferSize"),
 		upsertPredicate: Live.Conf.GetString("upsertPredicate"),
 		tmpDir:          Live.Conf.GetString("tmp"),
-		key:             keys.EncKey,
 	}
 
 	forceNs := Live.Conf.GetInt64("force-namespace")
@@ -819,6 +814,7 @@ func run() error {
 		fmt.Printf("Processed schema file %q\n\n", opt.schemaFile)
 	}
 
+	var err error
 	if l.schema, err = getSchema(ctx, dg, galaxyOperation); err != nil {
 		fmt.Printf("Error while loading schema from alpha %s\n", err)
 		return err
