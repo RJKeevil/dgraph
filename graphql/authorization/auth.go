@@ -29,7 +29,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-jose/go-jose"
+	"github.com/go-jose/go-jose/v3"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
