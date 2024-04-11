@@ -20,7 +20,7 @@ BUILD          ?= $(shell git rev-parse --short HEAD)
 BUILD_CODENAME ?= dgraph
 BUILD_DATE     ?= $(shell git log -1 --format=%ci)
 BUILD_BRANCH   ?= $(shell git rev-parse --abbrev-ref HEAD)
-BUILD_VERSION  ?= $(shell git describe --always --tags)
+BUILD_VERSION  ?= v23.1.1-knights
 
 # check if DGRAPH_VERSION flag is set (used for release pipeline)
 ifneq ($(DGRAPH_VERSION),)
@@ -117,4 +117,3 @@ jemalloc:
 			sudo make install ; \
 		fi \
 	fi
-
