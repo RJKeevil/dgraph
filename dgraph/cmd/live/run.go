@@ -46,6 +46,8 @@ import (
 	bopt "github.com/dgraph-io/badger/v4/options"
 	"github.com/dgraph-io/dgo/v230"
 	"github.com/dgraph-io/dgo/v230/protos/api"
+	"github.com/dgraph-io/ristretto/z"
+
 	"github.com/dgraph-io/dgraph/chunker"
 	"github.com/dgraph-io/dgraph/ee"
 	"github.com/dgraph-io/dgraph/ee/enc"
@@ -54,7 +56,6 @@ import (
 	"github.com/dgraph-io/dgraph/types"
 	"github.com/dgraph-io/dgraph/x"
 	"github.com/dgraph-io/dgraph/xidmap"
-	"github.com/dgraph-io/ristretto/z"
 )
 
 type options struct {
@@ -706,10 +707,10 @@ func run() error {
 	}
 
 	creds := z.NewSuperFlag(Live.Conf.GetString("creds")).MergeAndCheckDefault(x.DefaultCreds)
-	keys, err := ee.GetKeys(Live.Conf)
-	if err != nil {
-		return err
-	}
+	// keys, err := ee.GetKeys(Live.Conf)
+	// if err != nil {
+	// 	return err
+	// }
 
 	x.PrintVersion()
 	opt = options{
@@ -728,7 +729,7 @@ func run() error {
 		bufferSize:      Live.Conf.GetInt("bufferSize"),
 		upsertPredicate: Live.Conf.GetString("upsertPredicate"),
 		tmpDir:          Live.Conf.GetString("tmp"),
-		key:             keys.EncKey,
+		// key:             keys.EncKey,
 	}
 
 	forceNs := Live.Conf.GetInt64("force-namespace")
@@ -819,6 +820,7 @@ func run() error {
 		fmt.Printf("Processed schema file %q\n\n", opt.schemaFile)
 	}
 
+	var err error
 	if l.schema, err = getSchema(ctx, dg, galaxyOperation); err != nil {
 		fmt.Printf("Error while loading schema from alpha %s\n", err)
 		return err

@@ -50,6 +50,9 @@ import (
 
 	"github.com/dgraph-io/badger/v4"
 	"github.com/dgraph-io/dgo/v230/protos/api"
+	_ "github.com/dgraph-io/gqlparser/v2/validator/rules" // make gql validator init() all rules
+	"github.com/dgraph-io/ristretto/z"
+
 	"github.com/dgraph-io/dgraph/edgraph"
 	"github.com/dgraph-io/dgraph/ee"
 	"github.com/dgraph-io/dgraph/ee/audit"
@@ -60,8 +63,6 @@ import (
 	"github.com/dgraph-io/dgraph/tok"
 	"github.com/dgraph-io/dgraph/worker"
 	"github.com/dgraph-io/dgraph/x"
-	_ "github.com/dgraph-io/gqlparser/v2/validator/rules" // make gql validator init() all rules
-	"github.com/dgraph-io/ristretto/z"
 )
 
 var (
@@ -662,17 +663,17 @@ func run() {
 		TypeFilterUidLimit: x.Config.Limit.GetInt64("type-filter-uid-limit"),
 	}
 
-	keys, err := ee.GetKeys(Alpha.Conf)
-	x.Check(err)
-
-	if keys.AclSecretKey != nil {
-		opts.AclJwtAlg = keys.AclJwtAlg
-		opts.AclSecretKey = keys.AclSecretKey
-		opts.AclSecretKeyBytes = keys.AclSecretKeyBytes
-		opts.AccessJwtTtl = keys.AclAccessTtl
-		opts.RefreshJwtTtl = keys.AclRefreshTtl
-		glog.Info("ACL secret key loaded successfully.")
-	}
+	// keys, err := ee.GetKeys(Alpha.Conf)
+	// x.Check(err)
+	//
+	// if keys.AclSecretKey != nil {
+	// 	opts.AclJwtAlg = keys.AclJwtAlg
+	// 	opts.AclSecretKey = keys.AclSecretKey
+	// 	opts.AclSecretKeyBytes = keys.AclSecretKeyBytes
+	// 	opts.AccessJwtTtl = keys.AclAccessTtl
+	// 	opts.RefreshJwtTtl = keys.AclRefreshTtl
+	// 	glog.Info("ACL secret key loaded successfully.")
+	// }
 
 	abortDur := x.Config.Limit.GetDuration("txn-abort-after")
 	switch strings.ToLower(x.Config.Limit.GetString("mutations")) {
@@ -705,16 +706,16 @@ func run() {
 		Raft:                raft,
 		WhiteListedIPRanges: ips,
 		StrictMutations:     opts.MutationsMode == worker.StrictMutations,
-		AclEnabled:          keys.AclSecretKey != nil,
+		AclEnabled:          false,
 		AbortOlderThan:      abortDur,
 		StartTime:           startTime,
 		Security:            security,
 		TLSClientConfig:     tlsClientConf,
 		TLSServerConfig:     tlsServerConf,
-		AclJwtAlg:           keys.AclJwtAlg,
-		AclPublicKey:        keys.AclPublicKey,
-		Audit:               opts.Audit != nil,
-		Badger:              bopts,
+		// AclJwtAlg:           keys.AclJwtAlg,
+		// AclPublicKey:        keys.AclPublicKey,
+		Audit:  opts.Audit != nil,
+		Badger: bopts,
 	}
 	x.WorkerConfig.Parse(Alpha.Conf)
 
@@ -725,7 +726,7 @@ func run() {
 	// Set the directory for temporary buffers.
 	z.SetTmpDir(x.WorkerConfig.TmpDir)
 
-	x.WorkerConfig.EncryptionKey = keys.EncKey
+	// x.WorkerConfig.EncryptionKey = keys.EncKey
 
 	setupCustomTokenizers()
 	x.Config.PortOffset = Alpha.Conf.GetInt("port_offset")
