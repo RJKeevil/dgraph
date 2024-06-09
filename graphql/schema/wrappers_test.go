@@ -26,10 +26,11 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
+
+	"github.com/dgraph-io/gqlparser/v2/ast"
 
 	"github.com/dgraph-io/dgraph/v24/x"
-	"github.com/dgraph-io/gqlparser/v2/ast"
 )
 
 func TestDgraphMapping_WithoutDirectives(t *testing.T) {
