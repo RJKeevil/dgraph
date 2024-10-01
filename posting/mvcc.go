@@ -659,7 +659,7 @@ func (c *CachePL) Set(l *List, readTs uint64) {
 }
 
 func ShouldGoInCache(pk x.ParsedKey) bool {
-	return true
+	return !pk.IsData()
 }
 
 func PostingListCacheEnabled() bool {
