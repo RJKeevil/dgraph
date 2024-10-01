@@ -186,6 +186,8 @@ func (ir *incrRollupi) Process(closer *z.Closer, getNewTs func(bool) uint64) {
 	defer cleanupTick.Stop()
 	forceRollupTick := time.NewTicker(500 * time.Millisecond)
 	defer forceRollupTick.Stop()
+	deleteCacheTick := time.NewTicker(30 * time.Second)
+	defer deleteCacheTick.Stop()
 
 	doRollup := func(batch *[][]byte, priority int) {
 		currTs := time.Now().Unix()
@@ -216,6 +218,8 @@ func (ir *incrRollupi) Process(closer *z.Closer, getNewTs func(bool) uint64) {
 					delete(m, hash)
 				}
 			}
+		case <-deleteCacheTick.C:
+			globalCache.deleteOldItems(ir.getNewTs(false))
 		case <-forceRollupTick.C:
 			batch := ir.priorityKeys[0].keysPool.Get().(*[][]byte)
 			if len(*batch) > 0 {
@@ -417,6 +421,19 @@ func (sm *shardedMap) RUnlockKey(key uint64) {
 func (sm *shardedMap) Clear() {
 	for i := 0; i < numShards; i++ {
 		sm.shards[i].Clear()
+	}
+}
+
+func (sm *shardedMap) deleteOldItems(ts uint64) {
+	for i := 0; i < numShards; i++ {
+		sm.shards[i].Lock()
+		defer sm.shards[i].Unlock()
+
+		for keyHash, pl := range sm.shards[i].data {
+			if pl.lastUpdate < ts-20 {
+				delete(sm.shards[i].data, keyHash)
+			}
+		}
 	}
 }
 
