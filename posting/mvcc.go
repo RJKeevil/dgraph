@@ -19,6 +19,7 @@ package posting
 import (
 	"bytes"
 	"encoding/hex"
+	"fmt"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -186,7 +187,7 @@ func (ir *incrRollupi) Process(closer *z.Closer, getNewTs func(bool) uint64) {
 	defer cleanupTick.Stop()
 	forceRollupTick := time.NewTicker(500 * time.Millisecond)
 	defer forceRollupTick.Stop()
-	deleteCacheTick := time.NewTicker(30 * time.Second)
+	deleteCacheTick := time.NewTicker(10 * time.Second)
 	defer deleteCacheTick.Stop()
 
 	doRollup := func(batch *[][]byte, priority int) {
@@ -425,12 +426,16 @@ func (sm *shardedMap) Clear() {
 }
 
 func (sm *shardedMap) deleteOldItems(ts uint64) {
+	fmt.Println("Deleting old items")
+	defer func() {
+		fmt.Println("Done deleting old items")
+	}()
 	for i := 0; i < numShards; i++ {
 		sm.shards[i].Lock()
 		defer sm.shards[i].Unlock()
 
 		for keyHash, pl := range sm.shards[i].data {
-			if pl.lastUpdate < ts-20 {
+			if pl.lastUpdate < ts-10 {
 				delete(sm.shards[i].data, keyHash)
 			}
 		}
@@ -533,7 +538,11 @@ func (txn *Txn) UpdateCachedKeys(commitTs uint64) {
 			x.Check(p.Unmarshal(delta))
 			val.list.setMutationAfterCommit(txn.StartTs, commitTs, delta)
 		}
+
 		globalCache.UnlockKey(keyHash)
+		if val.list != nil && len(val.list.mutationMap) > 10 {
+			globalCache.Del(keyHash)
+		}
 	}
 }
 
