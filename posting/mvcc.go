@@ -723,13 +723,15 @@ func getNew(key []byte, pstore *badger.DB, readTs uint64) (*List, error) {
 	keyHash := z.MemHash(key)
 
 	if ShouldGoInCache(pk) {
-		cacheItem, ok := globalCache.Get(keyHash)
+		globalCache.LockKey(keyHash)
+		cacheItem, ok := globalCache.get(keyHash)
 		if !ok {
 			cacheItem = NewCachePL()
 			// TODO see if this is reuqired
-			globalCache.Set(keyHash, cacheItem)
+			globalCache.set(keyHash, cacheItem)
 		}
 		cacheItem.count += 1
+		globalCache.UnlockKey(keyHash)
 
 		// We use badger subscription to invalidate the cache. For every write we make the value
 		// corresponding to the key in the cache to nil. So, if we get some non-nil value from the cache
