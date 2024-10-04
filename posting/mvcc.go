@@ -399,6 +399,10 @@ func (sm *shardedMap) Set(key uint64, i *CachePL) {
 	sm.shards[key%uint64(numShards)].Set(key, i)
 }
 
+func (sm *shardedMap) del(key uint64) {
+	sm.shards[key%uint64(numShards)].del(key)
+}
+
 func (sm *shardedMap) Del(key uint64) {
 	sm.shards[key%uint64(numShards)].Del(key)
 }
@@ -480,6 +484,10 @@ func (m *lockedMap) Set(key uint64, i *CachePL) {
 	m.set(key, i)
 }
 
+func (m *lockedMap) del(key uint64) {
+	delete(m.data, key)
+}
+
 func (m *lockedMap) Del(key uint64) {
 	m.Lock()
 	delete(m.data, key)
@@ -526,6 +534,10 @@ func (txn *Txn) UpdateCachedKeys(commitTs uint64) {
 			val.lastUpdate = commitTs
 		}
 
+		p := new(pb.PostingList)
+		x.Check(p.Unmarshal(delta))
+		fmt.Println("====Committing ", txn.StartTs, commitTs, pk, p)
+
 		if !ok {
 			globalCache.UnlockKey(keyHash)
 			continue
@@ -539,10 +551,11 @@ func (txn *Txn) UpdateCachedKeys(commitTs uint64) {
 			val.list.setMutationAfterCommit(txn.StartTs, commitTs, delta)
 		}
 
-		globalCache.UnlockKey(keyHash)
 		if val.list != nil && len(val.list.mutationMap) > 10 {
-			globalCache.Del(keyHash)
+			globalCache.del(keyHash)
 		}
+
+		globalCache.UnlockKey(keyHash)
 	}
 }
 
@@ -741,6 +754,7 @@ func getNew(key []byte, pstore *badger.DB, readTs uint64) (*List, error) {
 				lCopy := copyList(cacheItem.list)
 				cacheItem.list.RUnlock()
 				globalCache.UnlockKey(keyHash)
+				fmt.Println("====Getting cache", readTs, pk, lCopy.mutationMap)
 				return lCopy, nil
 			}
 		}
@@ -788,5 +802,6 @@ func getNew(key []byte, pstore *badger.DB, readTs uint64) (*List, error) {
 		lCache.Set(key, l, 0)
 	}
 
+	fmt.Println("====Getting from disk", readTs, pk, l.mutationMap)
 	return l, nil
 }
