@@ -754,7 +754,7 @@ func getNew(key []byte, pstore *badger.DB, readTs uint64) (*List, error) {
 				lCopy := copyList(cacheItem.list)
 				cacheItem.list.RUnlock()
 				globalCache.UnlockKey(keyHash)
-				fmt.Println("====Getting cache", readTs, pk, lCopy.mutationMap)
+				fmt.Println("====Getting cache", readTs, pk, lCopy.mutationMap, lCopy.Value(readTs))
 				return lCopy, nil
 			}
 		}
@@ -794,6 +794,7 @@ func getNew(key []byte, pstore *badger.DB, readTs uint64) (*List, error) {
 		} else {
 			cacheItem.Set(copyList(l), readTs)
 		}
+		fmt.Println("====Getting from disk", readTs, pk, l.mutationMap, l.Value(readTs))
 		l.RUnlock()
 		globalCache.UnlockKey(keyHash)
 	}
@@ -802,6 +803,5 @@ func getNew(key []byte, pstore *badger.DB, readTs uint64) (*List, error) {
 		lCache.Set(key, l, 0)
 	}
 
-	fmt.Println("====Getting from disk", readTs, pk, l.mutationMap)
 	return l, nil
 }
