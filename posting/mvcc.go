@@ -731,7 +731,6 @@ func getNew(key []byte, pstore *badger.DB, readTs uint64) (*List, error) {
 			globalCache.set(keyHash, cacheItem)
 		}
 		cacheItem.count += 1
-		globalCache.UnlockKey(keyHash)
 
 		// We use badger subscription to invalidate the cache. For every write we make the value
 		// corresponding to the key in the cache to nil. So, if we get some non-nil value from the cache
@@ -741,9 +740,11 @@ func getNew(key []byte, pstore *badger.DB, readTs uint64) (*List, error) {
 				cacheItem.list.RLock()
 				lCopy := copyList(cacheItem.list)
 				cacheItem.list.RUnlock()
+				globalCache.UnlockKey(keyHash)
 				return lCopy, nil
 			}
 		}
+		globalCache.UnlockKey(keyHash)
 	}
 
 	txn := pstore.NewTransactionAt(readTs, false)
