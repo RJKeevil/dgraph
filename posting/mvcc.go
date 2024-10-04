@@ -534,9 +534,11 @@ func (txn *Txn) UpdateCachedKeys(commitTs uint64) {
 			val.lastUpdate = commitTs
 		}
 
-		p := new(pb.PostingList)
-		x.Check(p.Unmarshal(delta))
-		fmt.Println("====Committing ", txn.StartTs, commitTs, pk, p)
+		if commitTs != 0 {
+			p := new(pb.PostingList)
+			x.Check(p.Unmarshal(delta))
+			fmt.Println("====Committing ", txn.StartTs, commitTs, pk, p)
+		}
 
 		if !ok {
 			globalCache.UnlockKey(keyHash)
