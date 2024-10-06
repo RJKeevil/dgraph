@@ -757,7 +757,8 @@ func getNew(key []byte, pstore *badger.DB, readTs uint64) (*List, error) {
 				cacheItem.list.RUnlock()
 				globalCache.UnlockKey(keyHash)
 				allV, _ := lCopy.AllValues(readTs)
-				fmt.Println("====Getting cache", readTs, pk, lCopy.mutationMap, allV)
+				uids, _ := lCopy.Uids(ListOptions{ReadTs: readTs})
+				fmt.Println("====Getting cache", readTs, pk, lCopy.mutationMap, allV, uids)
 				return lCopy, nil
 			}
 		}
@@ -799,7 +800,8 @@ func getNew(key []byte, pstore *badger.DB, readTs uint64) (*List, error) {
 		}
 		l.RUnlock()
 		allV, _ := l.AllValues(readTs)
-		fmt.Println("====Getting from disk", readTs, pk, l.mutationMap, allV)
+		uids, _ := l.Uids(ListOptions{ReadTs: readTs})
+		fmt.Println("====Getting from disk", readTs, pk, l.mutationMap, allV, uids)
 		globalCache.UnlockKey(keyHash)
 	}
 
