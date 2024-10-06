@@ -553,11 +553,7 @@ func (txn *Txn) UpdateCachedKeys(commitTs uint64) {
 			p := new(pb.PostingList)
 			x.Check(p.Unmarshal(delta))
 			val.list.setMutationAfterCommit(txn.StartTs, commitTs, delta)
-			fmt.Println("====Setting cache list", commitTs, pk, p)
-		}
-
-		if val.list != nil && len(val.list.mutationMap) > 10 {
-			globalCache.del(keyHash)
+			fmt.Println("====Setting cache list", commitTs, pk, p, val.list.mutationMap)
 		}
 
 		globalCache.UnlockKey(keyHash)
