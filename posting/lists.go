@@ -395,6 +395,8 @@ func (lc *LocalCache) GetSinglePosting(key []byte) (*pb.PostingList, error) {
 		}
 	}
 	pl.Postings = pl.Postings[:idx]
+	pk, _ := x.Parse([]byte(key))
+	fmt.Println("====Getting single posting", lc.startTs, pk, pl.Postings)
 	return pl, nil
 }
 
