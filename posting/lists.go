@@ -143,7 +143,7 @@ func (vc *viLocalCache) GetWithLockHeld(key []byte) (rval index.Value, rerr erro
 func (vc *viLocalCache) GetValueFromPostingList(pl *List) (rval index.Value, rerr error) {
 	value := pl.findStaticValue(vc.delegate.startTs)
 
-	if value == nil {
+	if value == nil || len(value.Postings) == 0 {
 		return nil, ErrNoValue
 	}
 
