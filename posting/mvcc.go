@@ -135,8 +135,8 @@ func (ir *incrRollupi) rollUpKey(writer *TxnWriter, key []byte) error {
 	}
 
 	RemoveCacheFor(key)
-	pk, _ := x.Parse(key)
-	fmt.Println("====Setting cache delete rollup", ts, pk)
+	//pk, _ := x.Parse(key)
+	//fmt.Println("====Setting cache delete rollup", ts, pk)
 	globalCache.Del(z.MemHash(key))
 	// TODO Update cache with rolled up results
 	// If we do a rollup, we typically won't need to update the key in cache.
@@ -539,7 +539,7 @@ func (txn *Txn) UpdateCachedKeys(commitTs uint64) {
 		if commitTs != 0 {
 			p := new(pb.PostingList)
 			x.Check(p.Unmarshal(delta))
-			fmt.Println("====Committing ", txn.StartTs, commitTs, pk, p)
+			//fmt.Println("====Committing ", txn.StartTs, commitTs, pk, p)
 		}
 
 		if !ok {
@@ -553,7 +553,7 @@ func (txn *Txn) UpdateCachedKeys(commitTs uint64) {
 			p := new(pb.PostingList)
 			x.Check(p.Unmarshal(delta))
 			val.list.setMutationAfterCommit(txn.StartTs, commitTs, delta)
-			fmt.Println("====Setting cache list", commitTs, pk, p, val.list.mutationMap)
+			//fmt.Println("====Setting cache list", commitTs, pk, p, val.list.mutationMap)
 		}
 
 		globalCache.UnlockKey(keyHash)
@@ -742,7 +742,7 @@ func getNew(key []byte, pstore *badger.DB, readTs uint64) (*List, error) {
 		if !ok {
 			cacheItem = NewCachePL()
 			// TODO see if this is reuqired
-			fmt.Println("====Setting empty cache", readTs, pk)
+			//fmt.Println("====Setting empty cache", readTs, pk)
 			globalCache.set(keyHash, cacheItem)
 		}
 		cacheItem.count += 1
@@ -756,9 +756,9 @@ func getNew(key []byte, pstore *badger.DB, readTs uint64) (*List, error) {
 				lCopy := copyList(cacheItem.list)
 				cacheItem.list.RUnlock()
 				globalCache.UnlockKey(keyHash)
-				allV, _ := lCopy.AllValues(readTs)
-				uids, _ := lCopy.Uids(ListOptions{ReadTs: readTs})
-				fmt.Println("====Getting cache", readTs, pk, lCopy.mutationMap, allV, uids)
+				//allV, _ := lCopy.AllValues(readTs)
+				//uids, _ := lCopy.Uids(ListOptions{ReadTs: readTs})
+				//fmt.Println("====Getting cache", readTs, pk, lCopy.mutationMap, allV, uids)
 				return lCopy, nil
 			}
 		}
@@ -796,13 +796,13 @@ func getNew(key []byte, pstore *badger.DB, readTs uint64) (*List, error) {
 			cacheItemNew.lastUpdate = l.maxTs
 			globalCache.set(keyHash, cacheItemNew)
 		} else {
-			fmt.Println("====Setting cache", readTs, pk, l.mutationMap)
+			//fmt.Println("====Setting cache", readTs, pk, l.mutationMap)
 			cacheItem.Set(copyList(l), readTs)
 		}
 		l.RUnlock()
-		allV, _ := l.AllValues(readTs)
-		uids, _ := l.Uids(ListOptions{ReadTs: readTs})
-		fmt.Println("====Getting from disk", readTs, pk, l.mutationMap, allV, uids)
+		//allV, _ := l.AllValues(readTs)
+		//uids, _ := l.Uids(ListOptions{ReadTs: readTs})
+		//fmt.Println("====Getting from disk", readTs, pk, l.mutationMap, allV, uids)
 		globalCache.UnlockKey(keyHash)
 	}
 
