@@ -26,13 +26,14 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
+
+	_ "github.com/dgraph-io/gqlparser/v2/validator/rules" // make gql validator init() all rules
 
 	"github.com/dgraph-io/dgraph/v24/graphql/dgraph"
 	"github.com/dgraph-io/dgraph/v24/graphql/schema"
 	"github.com/dgraph-io/dgraph/v24/graphql/test"
 	"github.com/dgraph-io/dgraph/v24/testutil"
-	_ "github.com/dgraph-io/gqlparser/v2/validator/rules" // make gql validator init() all rules
 )
 
 // Tests showing that the query rewriter produces the expected Dgraph queries

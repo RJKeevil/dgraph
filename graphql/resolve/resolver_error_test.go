@@ -26,9 +26,10 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 
 	dgoapi "github.com/dgraph-io/dgo/v240/protos/api"
+
 	"github.com/dgraph-io/dgraph/v24/graphql/schema"
 	"github.com/dgraph-io/dgraph/v24/graphql/test"
 	"github.com/dgraph-io/dgraph/v24/x"
