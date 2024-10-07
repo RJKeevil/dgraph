@@ -436,16 +436,16 @@ func (sm *shardedMap) deleteOldItems(ts uint64) {
 	defer func() {
 		fmt.Println("Done deleting old items")
 	}()
-	//for i := 0; i < numShards; i++ {
-	//	sm.shards[i].Lock()
-	//	defer sm.shards[i].Unlock()
+	for i := 0; i < numShards; i++ {
+		sm.shards[i].Lock()
+		defer sm.shards[i].Unlock()
 
-	//	for keyHash, pl := range sm.shards[i].data {
-	//		if pl.lastUpdate < ts-100 {
-	//			delete(sm.shards[i].data, keyHash)
-	//		}
-	//	}
-	//}
+		for keyHash, pl := range sm.shards[i].data {
+			if pl.lastUpdate < ts-100 {
+				delete(sm.shards[i].data, keyHash)
+			}
+		}
+	}
 }
 
 type lockedMap struct {
